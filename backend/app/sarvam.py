@@ -23,22 +23,18 @@ class SarvamSpeechClient:
 
     def __init__(self, settings: Settings):
         self.settings = settings
-
-        # Reuse the same HTTP connection between requests.
         self.client = httpx.AsyncClient(
-            timeout=httpx.Timeout(
-                connect=3.0,
-                read=settings.sarvam_timeout_seconds,
-                write=5.0,
-                pool=2.0,
-            ),
-            limits=httpx.Limits(
-                max_connections=10,
-                max_keepalive_connections=5,
-                keepalive_expiry=30.0,
-            ),
-            http2=True,
-        )
+    http2=True,
+    timeout=httpx.Timeout(
+        self.settings.sarvam_timeout_seconds,
+        connect=3.0,
+    ),
+    limits=httpx.Limits(
+        max_connections=10,
+        max_keepalive_connections=10,
+    ),
+    )
+        
 
     @property
     def ready(self) -> bool:
@@ -52,12 +48,15 @@ class SarvamSpeechClient:
         content_type: str,
         language: str,
     ) -> Transcript:
-
         if not self.settings.sarvam_api_key:
-            raise SpeechServiceError("SARVAM_API_KEY is not configured.")
+            raise SpeechServiceError(
+                "SARVAM_API_KEY is not configured."
+            )
 
         if not audio:
-            raise SpeechServiceError("The audio file is empty.")
+            raise SpeechServiceError(
+                "The audio file is empty."
+            )
 
         headers = {
             "api-subscription-key": (
@@ -75,6 +74,8 @@ class SarvamSpeechClient:
 
         for attempt in range(3):
             try:
+                started = asyncio.get_running_loop().time()
+
                 response = await self.client.post(
                     self.endpoint,
                     headers=headers,
@@ -86,6 +87,18 @@ class SarvamSpeechClient:
                             content_type,
                         )
                     },
+                )
+
+                request_ms = (
+                    asyncio.get_running_loop().time() - started
+                ) * 1000
+
+                print(
+                    f"[STT DEBUG] "
+                    f"attempt={attempt + 1} "
+                    f"status={response.status_code} "
+                    f"request={request_ms:.2f}ms "
+                    f"audio={len(audio) / 1024:.1f}KB"
                 )
 
                 if response.status_code not in retryable:
@@ -105,24 +118,27 @@ class SarvamSpeechClient:
                     return Transcript(
                         text=value,
                         language_code=str(
-                            payload.get("language_code") or language
+                            payload.get("language_code")
+                            or language
                         ),
                     )
 
                 last_error = SpeechServiceError(
-                    f"Sarvam temporarily returned HTTP "
-                    f"{response.status_code}."
+                    "Sarvam temporarily returned "
+                    f"HTTP {response.status_code}."
                 )
 
-            except (httpx.TimeoutException, httpx.NetworkError) as error:
+            except (
+                httpx.TimeoutException,
+                httpx.NetworkError,
+            ) as error:
                 last_error = error
 
             if attempt < 2:
-                await asyncio.sleep(0.08 * (2**attempt))
+                await asyncio.sleep(
+                    0.08 * (2**attempt)
+                )
 
         raise SpeechServiceError(
             "Speech transcription failed after three attempts."
         ) from last_error
-
-    async def close(self) -> None:
-        await self.client.aclose()
