@@ -11,6 +11,7 @@ from .harness import QueryHarness
 from .retrieval import HybridRetriever
 from .sarvam import SarvamSpeechClient, SpeechServiceError
 from .schemas import HealthResponse, QueryRequest, QueryResponse
+from contextlib import asynccontextmanager
 
 
 settings = get_settings()
@@ -19,10 +20,18 @@ speech = SarvamSpeechClient(settings)
 generator = SarvamGroundedGenerator(settings)
 harness = QueryHarness(settings, retriever, generator)
 
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    yield
+    await speech.close()
+
+
 app = FastAPI(
     title="VaaniRAG API",
     version="1.0.0",
     description="Guarded hybrid retrieval over ai4bharat/MSMARCO-XI.",
+    lifespan=lifespan,
 )
 
 bearer_scheme = HTTPBearer(auto_error=False)
