@@ -1,6 +1,6 @@
 
 from __future__ import annotations
-
+from fastapi.middleware.cors import CORSMiddleware
 import time
 from fastapi import Depends, FastAPI, File, Form, Header, HTTPException, UploadFile, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
@@ -15,6 +15,8 @@ from contextlib import asynccontextmanager
 
 
 settings = get_settings()
+print("DEBUG SARVAM:", bool(settings.sarvam_api_key))
+print("DEBUG TOKEN:", bool(settings.api_bearer_token))
 retriever = HybridRetriever(settings)
 speech = SarvamSpeechClient(settings)
 generator = SarvamGroundedGenerator(settings)
@@ -32,6 +34,14 @@ app = FastAPI(
     version="1.0.0",
     description="Guarded hybrid retrieval over ai4bharat/MSMARCO-XI.",
     lifespan=lifespan,
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 bearer_scheme = HTTPBearer(auto_error=False)

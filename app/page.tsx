@@ -76,10 +76,16 @@ export default function Home() {
     setResult(null);
 
     try {
-      const response = await fetch("/api/query", {
+      const response = await fetch("http://127.0.0.1:8000/v1/query", {
         method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ question: cleaned, language }),
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer change-me",
+        },
+        body: JSON.stringify({
+          question: cleaned,
+          language,
+        }),
       });
       const payload = (await response.json()) as QueryResult & { error?: string };
       if (!response.ok) throw new Error(payload.error || "The query could not be processed.");
@@ -118,7 +124,7 @@ export default function Home() {
       recorder.onstop = async () => {
         setRecording(false);
         stream.getTracks().forEach((track) => track.stop());
-        const audio = new Blob(chunksRef.current, { type: recorder.mimeType });
+        const audio = new Blob(chunksRef.current, { type: "audio/webm" });
         if (!audio.size) {
           setNotice("No audio was captured. Please try again.");
           return;
@@ -158,24 +164,28 @@ export default function Home() {
   return (
     <main>
       <nav className="nav-shell" aria-label="Primary navigation">
-        <a className="wordmark" href="#top" aria-label="Vaani RAG home">
-          <span className="wordmark-mark" aria-hidden="true">v</span>
-          <span>vaani<span className="slash">/</span>rag</span>
+        <a className="wordmark" href="#top" aria-label="SyNroXRAG System Home">
+          <span className="wordmark-logo" aria-hidden="true">S</span>
+          <span>SyNroX<span className="slash">/</span>RAG</span>
         </a>
         <div className="nav-meta">
           <span className="status-dot" aria-hidden="true" />
           HH Goa 2026 build
         </div>
         <a className="nav-link" href="#architecture">How it works</a>
+        <a className="nav-link" href="#latency">build by @teamsynrox</a>
       </nav>
 
       <section className="hero" id="top">
         <div className="hero-copy">
-          <p className="eyebrow"><span>01</span> Voice-native retrieval for India</p>
-          <h1>Ask the dataset.<br /><em>Out loud.</em></h1>
+          <p className="eyebrow"><span>01</span> VOICE-NATIVE <b>•</b> GROUNDED <b> MULTILINGUAL</b></p>
+          <h1>
+            Synrox<span>RAG</span> System
+          </h1>
           <p className="hero-lede">
-            A grounded, multilingual RAG system over AI4Bharat&apos;s MSMARCO-XI.
-            Speak naturally. Get a cited answer - or an honest refusal.
+            Ask anything in your language.
+            <br />
+            Get grounded answers with evidence, not guesses.
           </p>
         </div>
 
@@ -183,7 +193,7 @@ export default function Home() {
           <div className="console-topline">
             <div>
               <span className="live-pill"><i /> LIVE PIPELINE</span>
-              <span className="index-label">Marathi validation index</span>
+              <span className="index-label">MULTILINGUAL KNOWLEDGE ENGINE</span>
             </div>
             <label className="language-control">
               <span className="sr-only">Question language</span>
@@ -350,9 +360,81 @@ export default function Home() {
           ))}
         </div>
       </section>
+      <section className="latency-note" id="latency">
+  <div className="latency-note-inner">
+    <div className="latency-note-header">
+      <span className="latency-note-index">04</span>
+      <span className="latency-note-label">TeamSyNroX note</span>
+    </div>
+
+    <div className="latency-note-grid">
+      <div>
+        <h2>
+          We didn't hit
+          <br />
+          <em>200 ms.</em>
+        </h2>
+      </div>
+
+      <div className="latency-note-copy">
+        <p className="latency-note-lede">
+          And we're not going to pretend we did.
+        </p>
+
+        <p>
+          Our target was a sub-200 ms end-to-end voice experience.
+          We pushed the retrieval and verification pipeline hard, but
+          speech-to-text remained the main latency bottleneck.
+        </p>
+
+        <p>
+          Across our tests, STT typically landed in the
+          <strong> 300–900 ms</strong> range, while retrieval itself
+          could respond in only a few milliseconds.
+        </p>
+
+        <p>
+          That's not the end of the project. It's the measurement that
+          tells us where the next round of engineering needs to happen.
+        </p>
+      </div>
+    </div>
+
+    <div className="latency-stats">
+      <div>
+        <span>Target</span>
+        <strong>&lt; 200 ms</strong>
+      </div>
+
+      <div>
+        <span>STT observed</span>
+        <strong>~300–900 ms</strong>
+      </div>
+
+      <div>
+        <span>Retrieval observed</span>
+        <strong>~6–130 ms</strong>
+      </div>
+
+      <div className="latency-next">
+        <span>Next</span>
+        <strong>Optimize the voice path →</strong>
+      </div>
+    </div>
+
+    <div className="latency-motivation">
+      <span>BUILD → MEASURE → LEARN → ITERATE</span>
+      <p>
+        Every limitation gives us another thing to improve.
+        This is version one. We're just getting started.
+        Signing off -teamsynrox
+      </p>
+    </div>
+  </div>
+</section>
 
       <footer>
-        <a className="wordmark" href="#top"><span className="wordmark-mark">v</span><span>vaani<span className="slash">/</span>rag</span></a>
+        <a className="wordmark" href="#top"><span className="wordmark-mark">v</span><span>SyNroX<span className="slash">/</span>RAG</span></a>
         <p>Built for HH Goa 2026 · AI4Bharat MSMARCO-XI · <b>#RAGInGoa</b></p>
         <a href="https://huggingface.co/datasets/ai4bharat/MSMARCO-XI" target="_blank" rel="noreferrer">Dataset ↗</a>
       </footer>
