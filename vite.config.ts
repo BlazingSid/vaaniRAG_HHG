@@ -36,9 +36,7 @@ const localBindingConfig = {
 
 export default defineConfig({
   server: {
-    allowedHosts: [
-      "potentially-rolls-brands-browser.trycloudflare.com",
-    ],
+    allowedHosts: true,
   },
 
   plugins: [

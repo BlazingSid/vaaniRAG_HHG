@@ -47,3 +47,7 @@ next-env.d.ts
 /outputs/
 /work/
 .venv/
+
+backend/scripts/migrate_qdrant.py
+*.checkpoint.json
+.migrate_checkpoint.json

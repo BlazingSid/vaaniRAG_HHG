@@ -76,11 +76,10 @@ export default function Home() {
     setResult(null);
 
     try {
-      const response = await fetch("https://girls-tabs-gave-sensitivity.trycloudflare.com/v1/query", {
+      const response = await fetch("/api/query", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: "Bearer change-me",
         },
         body: JSON.stringify({
           question: cleaned,
@@ -134,27 +133,10 @@ export default function Home() {
           const form = new FormData();
           form.append("audio", audio, "question.webm");
           form.append("language", language);
-          const response = await fetch(
-  "https://girls-tabs-gave-sensitivity.trycloudflare.com/v1/query",
-  {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: "Bearer change-me",
-    },
-    body: JSON.stringify({
-      question,
-      language: "en-IN",
-      mode: "fast",
-    }),
-  }
-);
-
-if (!response.ok) {
-  throw new Error(`API request failed: ${response.status}`);
-}
-
-const data = await response.json();
+          const response = await fetch("/api/transcribe", {
+            method: "POST",
+            body: form,
+          });
           const payload = (await response.json()) as { transcript?: string; error?: string };
           if (!response.ok || !payload.transcript) {
             throw new Error(payload.error || "Speech could not be transcribed.");

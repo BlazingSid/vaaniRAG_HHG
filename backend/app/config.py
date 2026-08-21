@@ -22,7 +22,7 @@ class Settings(BaseSettings):
     qdrant_url: str = "http://localhost:6333"
     qdrant_api_key: SecretStr | None = None
     qdrant_collection: str = "msmarco_xi_multiview_v1"
-    qdrant_timeout_seconds: float = 2.0
+    qdrant_timeout_seconds: float = 10.0
     prefer_grpc: bool = False
 
     dense_model: str = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"

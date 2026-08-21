@@ -32,7 +32,7 @@ export async function POST(request: Request) {
   const backendUrl = runtime.RAG_BACKEND_URL?.replace(/\/$/, "");
   if (backendUrl) {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 4500);
+    const timeout = setTimeout(() => controller.abort(), 15000);
     try {
       const upstream = await fetch(`${backendUrl}/v1/query`, {
         method: "POST",

@@ -36,6 +36,7 @@ class HybridRetriever:
             api_key=api_key,
             timeout=settings.qdrant_timeout_seconds,
             prefer_grpc=settings.prefer_grpc,
+            check_compatibility=False,
         )
 
     def ready(self) -> bool:
